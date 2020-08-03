@@ -1,0 +1,37 @@
+<html>
+  <head><title>Test SW registration in cross origin isolated window</title></head>
+  <body>
+    <div id='result'></div>
+  </body>
+  <script type="application/javascript">
+    const testTimes = 1000;
+    function testSWRegistration(times = 1) {
+      if (times === 0) {
+        document.getElementById('result').innerHTML = 'Service worker registration test passed';
+        console.log('Service worker registration test passed');
+        return;
+      }
+      navigator.serviceWorker.register('./sw.js').then(function(registration) {
+        document.getElementById('result').innerHTML = `Service worker registration test started ${testTimes - times}/${testTimes}`;
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        registration.unregister().then((boolean) => {
+          if (boolean) {
+            console.log('ServiceWorker unregister success', times);
+            testSWRegistration(times - 1);
+          }
+        });
+      }, function(err) {
+        document.getElementById('result').innerHTML = 'Service worker registration test failed: registration failed' + err;
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    }
+
+    window.addEventListener('load', function() {
+      if (crossOriginIsolated) {
+        testSWRegistration(testTimes);
+      } else {
+        document.getElementById('result').innerHTML = 'Failed crossOriginIsolated is false';
+      }
+    });
+  </script>
+</html>
